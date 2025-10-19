@@ -1,27 +1,25 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="vi">
 <head>
-  <title>Trái tim & Sao băng lung linh 💖🌠</title>
   <meta charset="UTF-8">
+  <title>💖 Trái tim & Sao băng lung linh 💖</title>
   <style>
     html, body {
       height: 100%;
-      padding: 0;
       margin: 0;
+      padding: 0;
       overflow: hidden;
       background: rgba(0, 0, 0, 0.95);
     }
+
     canvas {
       position: fixed;
       width: 100%;
       height: 100%;
     }
-    #stars {
-      z-index: 0;
-    }
-    #pinkboard {
-      z-index: 1;
-    }
+
+    #stars { z-index: 0; }
+    #pinkboard { z-index: 1; }
 
     /* 🌸 Dòng chữ chúc mừng */
     #message {
@@ -48,35 +46,34 @@
       100% { opacity: 0.8; text-shadow: 0 0 10px #fff, 0 0 20px #ff69b4, 0 0 30px #ff1493; }
     }
 
-    /* 🔘 Nút nhạc */
-    #musicBtn {
+    /* 🎵 Nút bật/tắt nhạc */
+    #music-btn {
       position: fixed;
-      bottom: 100px;
-      right: 40px;
-      background: rgba(255,182,193,0.9);
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #ff7eb3, #ff4081);
+      color: white;
       border: none;
+      padding: 20px 45px;
+      font-size: 24px;
+      font-weight: bold;
       border-radius: 50px;
-      padding: 12px 20px;
-      font-size: 18px;
-      color: #fff;
-      text-shadow: 0 0 8px #ff69b4;
       cursor: pointer;
-      box-shadow: 0 0 15px #ff1493;
+      box-shadow: 0 0 25px #ff69b4, 0 0 45px #ff1493;
       transition: all 0.3s ease;
-      z-index: 5;
-    }
-    #musicBtn:hover {
-      background: #ff69b4;
-      transform: scale(1.1);
+      z-index: 20;
     }
 
-    /* ✨ Hiệu ứng phát sáng khi nhạc đang bật */
-    .playing {
-      animation: glow 1.2s infinite alternate;
+    #music-btn:hover {
+      background: linear-gradient(135deg, #ff4081, #ff1493);
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 0 40px #ff1493, 0 0 70px #ff69b4;
     }
-    @keyframes glow {
-      0% { box-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493; }
-      100% { box-shadow: 0 0 25px #ffb6c1, 0 0 45px #ff69b4; }
+
+    #music-btn.playing {
+      background: linear-gradient(135deg, #ff1493, #ff69b4);
+      box-shadow: 0 0 35px #ff69b4, 0 0 60px #ff1493;
     }
   </style>
 </head>
@@ -86,31 +83,68 @@
   <!-- Trái tim -->
   <canvas id="pinkboard"></canvas>
 
-  <!-- Dòng chữ -->
+  <!-- Dòng chữ chúc mừng -->
   <div id="message">
     💖 Chúc các bạn Khả Nhi, Ngô Nghi, Thùy An, Ngọc Doanh, Quỳnh Anh 20/10 vui vẻ, lấp lánh nha 💖
   </div>
 
-  <!-- 🔘 Nút nhạc -->
-  <button id="musicBtn">🎵 Bật nhạc</button>
+  <!-- 🎵 Nút bật/tắt nhạc -->
+  <button id="music-btn">🎵 Bật nhạc</button>
 
-  <!-- 🎶 Trình phát nhạc ẩn -->
-  <iframe id="musicFrame"
-    src="https://www.youtube.com/embed/vXkdrjhPGKs?enablejsapi=1&mute=0&loop=1&playlist=vXkdrjhPGKs"
-    style="width:0;height:0;border:none;"
-    allow="autoplay"
-  ></iframe>
+  <!-- Nhạc nền (YouTube) -->
+  <iframe id="youtube-player" width="0" height="0"
+    src="https://www.youtube.com/embed/vXkdrjhPGKs?enablejsapi=1"
+    frameborder="0" allow="autoplay"></iframe>
 
-  <!-- 🌠 Hiệu ứng sao băng -->
+  <script>
+    // Điều khiển nhạc YouTube
+    const btn = document.getElementById('music-btn');
+    const iframe = document.getElementById('youtube-player');
+    let isPlaying = false;
+
+    function postCommand(cmd) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: cmd, args: [] }),
+        '*'
+      );
+    }
+
+    btn.onclick = function() {
+      if (isPlaying) {
+        postCommand('pauseVideo');
+        btn.textContent = '🎵 Bật nhạc';
+        btn.classList.remove('playing');
+      } else {
+        postCommand('playVideo');
+        btn.textContent = '🔇 Tắt nhạc';
+        btn.classList.add('playing');
+      }
+      isPlaying = !isPlaying;
+    };
+  </script>
+
+  <!-- 🌠 Sao băng -->
   <script>
     const canvasStars = document.getElementById('stars');
     const ctxStars = canvasStars.getContext('2d');
-    let w = window.innerWidth, h = window.innerHeight;
-    canvasStars.width = w; canvasStars.height = h;
-    let stars = [], shootingStars = [];
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    canvasStars.width = w;
+    canvasStars.height = h;
+
+    let stars = [];
+    let shootingStars = [];
+
     for (let i = 0; i < 250; i++) {
-      stars.push({x: Math.random()*w, y: Math.random()*h, radius: Math.random()*1.3, alpha: Math.random(), alphaChange: 0.02 + Math.random()*0.02});
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        radius: Math.random() * 1.3,
+        alpha: Math.random(),
+        alphaChange: 0.02 + Math.random() * 0.02
+      });
     }
+
     function drawStars() {
       for (let s of stars) {
         ctxStars.beginPath();
@@ -121,15 +155,24 @@
         if (s.alpha <= 0 || s.alpha >= 1) s.alphaChange *= -1;
       }
     }
+
     function createShootingStar() {
-      shootingStars.push({x: w + 200, y: Math.random()*h*0.7, len: 250 + Math.random()*150, speed: 12 + Math.random()*8, size: 1.5 + Math.random()*1.5, alpha: 1});
+      shootingStars.push({
+        x: w + 200,
+        y: Math.random() * h * 0.7,
+        len: 250 + Math.random() * 150,
+        speed: 12 + Math.random() * 8,
+        size: 1.5 + Math.random() * 1.5,
+        alpha: 1
+      });
     }
+
     function drawShootingStars() {
       for (let i = 0; i < shootingStars.length; i++) {
         const s = shootingStars[i];
         const grad = ctxStars.createLinearGradient(s.x, s.y, s.x - s.len, s.y + s.len * 0.3);
         grad.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
-        grad.addColorStop(0.3, `rgba(255,255,200,${s.alpha*0.8})`);
+        grad.addColorStop(0.3, `rgba(255,255,200,${s.alpha * 0.8})`);
         grad.addColorStop(1, `rgba(255,255,255,0)`);
         ctxStars.strokeStyle = grad;
         ctxStars.lineWidth = s.size;
@@ -143,6 +186,7 @@
         if (s.alpha <= 0) shootingStars.splice(i, 1);
       }
     }
+
     function animateStars() {
       ctxStars.clearRect(0, 0, w, h);
       drawStars();
@@ -151,53 +195,145 @@
       requestAnimationFrame(animateStars);
     }
     animateStars();
-    window.addEventListener('resize', () => { w = innerWidth; h = innerHeight; canvasStars.width = w; canvasStars.height = h; });
+
+    window.addEventListener('resize', () => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvasStars.width = w;
+      canvasStars.height = h;
+    });
   </script>
 
   <!-- 💖 Trái tim -->
   <script>
-  var settings = {particles:{length:10000,duration:4,velocity:80,effect:-1.3,size:8}};
-  (function(){var b=0;var c=["ms","moz","webkit","o"];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+"RequestAnimationFrame"];window.cancelAnimationFrame=window[c[a]+"CancelAnimationFrame"]||window[c[a]+"CancelRequestAnimationFrame"];}})();
-
-  var Point=function(x,y){this.x=x||0;this.y=y||0;};Point.prototype.clone=function(){return new Point(this.x,this.y);};Point.prototype.length=function(l){if(l===undefined)return Math.sqrt(this.x*this.x+this.y*this.y);this.normalize();this.x*=l;this.y*=l;return this;};Point.prototype.normalize=function(){var l=this.length();this.x/=l;this.y/=l;return this;};
-
-  var Particle=function(){this.position=new Point();this.velocity=new Point();this.acceleration=new Point();this.age=0;};
-  Particle.prototype.initialize=function(x,y,dx,dy){this.position.x=x;this.position.y=y;this.velocity.x=dx;this.velocity.y=dy;this.acceleration.x=dx*settings.particles.effect;this.acceleration.y=dy*settings.particles.effect;this.age=0;};
-  Particle.prototype.update=function(dt){this.position.x+=this.velocity.x*dt;this.position.y+=this.velocity.y*dt;this.velocity.x+=this.acceleration.x*dt;this.velocity.y+=this.acceleration.y*dt;this.age+=dt;};
-  Particle.prototype.draw=function(ctx,img){function ease(t){return(--t)*t*t+1;}var size=img.width*ease(this.age/settings.particles.duration);ctx.globalAlpha=1-this.age/settings.particles.duration;ctx.drawImage(img,this.position.x-size/2,this.position.y-size/2,size,size);};
-
-  var ParticlePool=function(l){var p=new Array(l);for(var i=0;i<p.length;i++)p[i]=new Particle();var fa=0,ff=0,d=settings.particles.duration;this.add=function(x,y,dx,dy){p[ff].initialize(x,y,dx,dy);ff++;if(ff==p.length)ff=0;if(fa==ff)fa++;if(fa==p.length)fa=0;};this.update=function(dt){var i;if(fa<ff){for(i=fa;i<ff;i++)p[i].update(dt);}if(ff<fa){for(i=fa;i<p.length;i++)p[i].update(dt);for(i=0;i<ff;i++)p[i].update(dt);}while(p[fa].age>=d&&fa!=ff){fa++;if(fa==p.length)fa=0;}};this.draw=function(ctx,img){var i;if(fa<ff){for(i=fa;i<ff;i++)p[i].draw(ctx,img);}if(ff<fa){for(i=fa;i<p.length;i++)p[i].draw(ctx,img);for(i=0;i<ff;i++)p[i].draw(ctx,img);}};return this;};
-
-  (function(canvas){var ctx=canvas.getContext('2d'),pool=new ParticlePool(settings.particles.length),rate=settings.particles.length/settings.particles.duration,time;
-    function pointOnHeart(t){return new Point(160*Math.pow(Math.sin(t),3),130*Math.cos(t)-50*Math.cos(2*t)-20*Math.cos(3*t)-10*Math.cos(4*t)+25);}
-    var img=(function(){var c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=settings.particles.size;c.height=settings.particles.size;
-      function to(t){var p=pointOnHeart(t);p.x=settings.particles.size/2+p.x*settings.particles.size/350;p.y=settings.particles.size/2-p.y*settings.particles.size/350;return p;}
-      ctx.beginPath();var t=-Math.PI,p=to(t);ctx.moveTo(p.x,p.y);while(t<Math.PI){t+=0.01;p=to(t);ctx.lineTo(p.x,p.y);}ctx.closePath();ctx.fillStyle='#f50b02';ctx.fill();var img=new Image();img.src=c.toDataURL();return img;})();
-    function render(){requestAnimationFrame(render);var nt=new Date().getTime()/1000,dt=nt-(time||nt);time=nt;ctx.clearRect(0,0,canvas.width,canvas.height);var amount=rate*dt;for(var i=0;i<amount;i++){var pos=pointOnHeart(Math.PI-2*Math.PI*Math.random());var dir=pos.clone().length(settings.particles.velocity);pool.add(canvas.width/2+pos.x,canvas.height/2-pos.y,dir.x,-dir.y);}pool.update(dt);pool.draw(ctx,img);}
-    function onResize(){canvas.width=canvas.clientWidth;canvas.height=canvas.clientHeight;}window.onresize=onResize;setTimeout(function(){onResize();render();},10);
-  })(document.getElementById('pinkboard'));
-  </script>
-
-  <!-- 🎵 Script điều khiển nhạc -->
-  <script>
-    const btn = document.getElementById('musicBtn');
-    const iframe = document.getElementById('musicFrame');
-    let isPlaying = false;
-    function postCommand(cmd){
-      iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:cmd,args:[]}), '*');
-    }
-    btn.onclick = function(){
-      if(isPlaying){
-        postCommand('pauseVideo');
-        btn.textContent = '🎵 Bật nhạc';
-        btn.classList.remove('playing');
-      } else {
-        postCommand('playVideo');
-        btn.textContent = '🔇 Tắt nhạc';
-        btn.classList.add('playing');
-      }
-      isPlaying = !isPlaying;
+    var settings = {
+      particles: { length: 10000, duration: 4, velocity: 80, effect: -1.3, size: 8 },
     };
+
+    var Point = function(x, y) { this.x = x; this.y = y; };
+    Point.prototype.clone = function() { return new Point(this.x, this.y); };
+    Point.prototype.length = function(len) {
+      if (len === undefined) return Math.sqrt(this.x * this.x + this.y * this.y);
+      this.normalize(); this.x *= len; this.y *= len; return this;
+    };
+    Point.prototype.normalize = function() {
+      var len = this.length(); this.x /= len; this.y /= len; return this;
+    };
+
+    var Particle = function() {
+      this.position = new Point();
+      this.velocity = new Point();
+      this.acceleration = new Point();
+      this.age = 0;
+    };
+
+    Particle.prototype.initialize = function(x, y, dx, dy) {
+      this.position.x = x; this.position.y = y;
+      this.velocity.x = dx; this.velocity.y = dy;
+      this.acceleration.x = dx * settings.particles.effect;
+      this.acceleration.y = dy * settings.particles.effect;
+      this.age = 0;
+    };
+
+    Particle.prototype.update = function(dt) {
+      this.position.x += this.velocity.x * dt;
+      this.position.y += this.velocity.y * dt;
+      this.velocity.x += this.acceleration.x * dt;
+      this.velocity.y += this.acceleration.y * dt;
+      this.age += dt;
+    };
+
+    Particle.prototype.draw = function(ctx, img) {
+      function ease(t) { return (--t) * t * t + 1; }
+      var size = img.width * ease(this.age / settings.particles.duration);
+      ctx.globalAlpha = 1 - this.age / settings.particles.duration;
+      ctx.drawImage(img, this.position.x - size / 2, this.position.y - size / 2, size, size);
+    };
+
+    var ParticlePool = function(length) {
+      var particles = new Array(length), firstActive = 0, firstFree = 0, duration = settings.particles.duration;
+      for (var i = 0; i < length; i++) particles[i] = new Particle();
+
+      this.add = function(x, y, dx, dy) {
+        particles[firstFree].initialize(x, y, dx, dy);
+        firstFree = (firstFree + 1) % length;
+        if (firstActive === firstFree) firstActive = (firstActive + 1) % length;
+      };
+
+      this.update = function(dt) {
+        var i = firstActive;
+        while (i !== firstFree) {
+          particles[i].update(dt);
+          if (particles[i].age >= duration) firstActive = (firstActive + 1) % length;
+          i = (i + 1) % length;
+        }
+      };
+
+      this.draw = function(ctx, img) {
+        var i = firstActive;
+        while (i !== firstFree) {
+          particles[i].draw(ctx, img);
+          i = (i + 1) % length;
+        }
+      };
+    };
+
+    (function(canvas) {
+      var ctx = canvas.getContext('2d');
+      var pool = new ParticlePool(settings.particles.length);
+      var rate = settings.particles.length / settings.particles.duration;
+      var time;
+
+      function pointOnHeart(t) {
+        return new Point(
+          160 * Math.pow(Math.sin(t), 3),
+          130 * Math.cos(t) - 50 * Math.cos(2 * t) - 20 * Math.cos(3 * t) - 10 * Math.cos(4 * t) + 25
+        );
+      }
+
+      var image = (function() {
+        var c = document.createElement('canvas'), ctx = c.getContext('2d');
+        c.width = settings.particles.size; c.height = settings.particles.size;
+        ctx.beginPath();
+        var t = -Math.PI, point = to(t);
+        function to(t) {
+          var p = pointOnHeart(t);
+          p.x = settings.particles.size / 2 + p.x * settings.particles.size / 350;
+          p.y = settings.particles.size / 2 - p.y * settings.particles.size / 350;
+          return p;
+        }
+        ctx.moveTo(point.x, point.y);
+        while (t < Math.PI) { t += 0.01; point = to(t); ctx.lineTo(point.x, point.y); }
+        ctx.closePath();
+        ctx.fillStyle = '#f50b02';
+        ctx.fill();
+        var img = new Image();
+        img.src = c.toDataURL();
+        return img;
+      })();
+
+      function render() {
+        requestAnimationFrame(render);
+        var newTime = new Date().getTime() / 1000, dt = newTime - (time || newTime);
+        time = newTime;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < rate * dt; i++) {
+          var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
+          var dir = pos.clone().length(settings.particles.velocity);
+          pool.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
+        }
+        pool.update(dt);
+        pool.draw(ctx, image);
+      }
+
+      function resize() {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+
+      window.onresize = resize;
+      setTimeout(() => { resize(); render(); }, 10);
+    })(document.getElementById('pinkboard'));
   </script>
 </body>
 </html>
